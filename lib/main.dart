@@ -81,10 +81,13 @@ class _FileExplorerScreenState extends State<FileExplorerScreen> {
 
   Future<List<Map<String, dynamic>>> getDrivesOnWindows() async {
     List<Map<String, dynamic>> drives = [];
-    ProcessResult result = await Process.run('powershell',
-        ['[System.IO.DriveInfo]::GetDrives()'], stdoutEncoding: const Utf8Codec(),);
+    ProcessResult result = await Process.run(
+      'powershell',
+      ['[System.IO.DriveInfo]::GetDrives()'],
+      stdoutEncoding: const Utf8Codec(),
+    );
 
-        if (result.exitCode == 0) {
+    if (result.exitCode == 0) {
       String output = result.stdout;
       List<String> lines = output.split('\n');
       Map<String, dynamic> currentDrive = {};
@@ -94,6 +97,9 @@ class _FileExplorerScreenState extends State<FileExplorerScreen> {
         if (line.isEmpty) {
           if (currentDrive.isNotEmpty) {
             currentDrive['Name'] = currentDrive['Name'].replaceAll('\\', '');
+            currentDrive['TotalSize'] = int.parse(currentDrive['TotalSize']) ~/ (1024 * 1024 * 1024);
+
+            currentDrive['TotalFreeSpace'] =int.parse(currentDrive['TotalFreeSpace']) ~/ (1024 * 1024 * 1024);
             drives.add(currentDrive);
             currentDrive = {};
           }
@@ -108,6 +114,8 @@ class _FileExplorerScreenState extends State<FileExplorerScreen> {
       }
       if (currentDrive.isNotEmpty) {
         currentDrive['Name'] = currentDrive['Name'].replaceAll('\\', '');
+            currentDrive['TotalSize'] = int.parse(currentDrive['TotalSize']) ~/ (1024 * 1024 * 1024);
+            currentDrive['TotalFreeSpace'] =int.parse(currentDrive['TotalFreeSpace']) ~/ (1024 * 1024 * 1024);
         drives.add(currentDrive);
       }
     }
@@ -248,13 +256,14 @@ class _FileExplorerScreenState extends State<FileExplorerScreen> {
                         for (var drive in drives)
                           Expanded(
                             child: ListTile(
-                              title:
-                                  Text('${drive['VolumeLabel']} (${drive['Name']})'),
+                              title: Text(
+                                  '${drive['VolumeLabel']} (${drive['Name']})'),
+                              subtitle: Text(
+                                  '${drive['TotalFreeSpace']} GB Free of ${drive['TotalSize']} GB'),
                               leading: Icon(Icons.drive_file_rename_outline),
                               onTap: () {
                                 setState(() {
-                                  _currentDirectory =
-                                      Directory(drive['Name']);
+                                  _currentDirectory = Directory(drive['Name']);
                                   _currentPath = drive['Name'];
                                 });
                               },
