@@ -97,9 +97,12 @@ class _FileExplorerScreenState extends State<FileExplorerScreen> {
         if (line.isEmpty) {
           if (currentDrive.isNotEmpty) {
             currentDrive['Name'] = currentDrive['Name'].replaceAll('\\', '');
-            currentDrive['TotalSize'] = int.parse(currentDrive['TotalSize']) ~/ (1024 * 1024 * 1024);
+            currentDrive['TotalSize'] =
+                double.parse(currentDrive['TotalSize']) / (1024 * 1024 * 1024);
 
-            currentDrive['TotalFreeSpace'] =int.parse(currentDrive['TotalFreeSpace']) ~/ (1024 * 1024 * 1024);
+            currentDrive['TotalFreeSpace'] =
+                double.parse(currentDrive['TotalFreeSpace']) /
+                    (1024 * 1024 * 1024);
             drives.add(currentDrive);
             currentDrive = {};
           }
@@ -114,8 +117,10 @@ class _FileExplorerScreenState extends State<FileExplorerScreen> {
       }
       if (currentDrive.isNotEmpty) {
         currentDrive['Name'] = currentDrive['Name'].replaceAll('\\', '');
-            currentDrive['TotalSize'] = int.parse(currentDrive['TotalSize']) ~/ (1024 * 1024 * 1024);
-            currentDrive['TotalFreeSpace'] =int.parse(currentDrive['TotalFreeSpace']) ~/ (1024 * 1024 * 1024);
+        currentDrive['TotalSize'] =
+            double.parse(currentDrive['TotalSize']) / (1024 * 1024 * 1024);
+        currentDrive['TotalFreeSpace'] =
+            double.parse(currentDrive['TotalFreeSpace']) / (1024 * 1024 * 1024);
         drives.add(currentDrive);
       }
     }
@@ -258,8 +263,18 @@ class _FileExplorerScreenState extends State<FileExplorerScreen> {
                             child: ListTile(
                               title: Text(
                                   '${drive['VolumeLabel']} (${drive['Name']})'),
-                              subtitle: Text(
-                                  '${drive['TotalFreeSpace']} GB Free of ${drive['TotalSize']} GB'),
+                              subtitle: Column(
+                                children: [
+                                  LinearProgressIndicator(
+                                    value: 1.0 -
+                                        (drive['TotalFreeSpace'] / drive['TotalSize']),
+                                    valueColor:
+                                        AlwaysStoppedAnimation(Colors.blue),
+                                  ),
+                                  Text(
+                                      '${drive['TotalFreeSpace'].toStringAsFixed(1)} GB Free of ${drive['TotalSize'].toStringAsFixed(1)} GB'),
+                                ],
+                              ),
                               leading: Icon(Icons.drive_file_rename_outline),
                               onTap: () {
                                 setState(() {
