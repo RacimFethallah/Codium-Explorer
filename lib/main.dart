@@ -206,10 +206,10 @@ class _FileExplorerScreenState extends State<FileExplorerScreen>
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
       child: Scaffold(
-        backgroundColor: const Color.fromARGB(200, 215, 215, 215),
+        backgroundColor: Color.fromARGB(199, 221, 221, 221),
         appBar: AppBar(
           flexibleSpace: shortLongPress(
-            duration: const Duration(milliseconds: 50),
+            duration: const Duration(milliseconds: 0),
             onLongPress: () {
               windowManager.startDragging();
             },
@@ -266,23 +266,25 @@ class _FileExplorerScreenState extends State<FileExplorerScreen>
                           maxHeight: 20,
                           maxWidth: 20,
                         ),
-                        onPressed: () {
-                          windowManager.maximize();
+                        onPressed: () async {
+                          await windowManager.isMaximized()
+                              ? windowManager.unmaximize()
+                              : windowManager.maximize();
                         },
-                        icon: Icon(Icons.crop_landscape_rounded, size: 20)),
+                        icon: const Icon(Icons.circle_outlined, size: 16)),
                     SizedBox(width: 18),
                     IconButton(
                       padding: EdgeInsets.zero,
                       splashColor: Colors.red.shade300,
                       hoverColor: Colors.red.shade300,
-                      constraints: BoxConstraints(
+                      constraints: const BoxConstraints(
                         maxHeight: 20,
                         maxWidth: 20,
                       ),
                       onPressed: () {
                         windowManager.close();
                       },
-                      icon: Icon(Icons.close_rounded, size: 20),
+                      icon: const Icon(Icons.close_rounded, size: 20),
                     ),
                   ],
                 ),
@@ -290,7 +292,25 @@ class _FileExplorerScreenState extends State<FileExplorerScreen>
             ],
           ),
         ),
-        body: Center(),
+        body: Column(
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 40),
+              child: Row(
+                children: [
+                  Text('Home',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.w400)),
+                  Spacer(),
+                ],
+              ),
+            ),
+            Container(
+              
+            ),
+          ],
+        ),
       ),
     );
   }
