@@ -4,6 +4,8 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   disks_desktop
+  screen_retriever
+  window_manager
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
