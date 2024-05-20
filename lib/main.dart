@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:glass_kit/glass_kit.dart';
+import 'package:system_theme/system_theme.dart';
+import 'package:fluent_ui/fluent_ui.dart' as FluentUI;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,12 +33,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return FluentUI.FluentApp(
+      theme: FluentUI.FluentThemeData(
+        accentColor: SystemTheme.accentColor.accent.toAccentColor(),
+      ),
       debugShowCheckedModeBanner: false,
       title: 'File Explorer',
       home: FileExplorerScreen(),
     );
   }
+}
+
+class QuickAccessItem {
+  final Icon icon;
+  final String name;
+
+  QuickAccessItem({required this.icon, required this.name});
 }
 
 class FileExplorerScreen extends StatefulWidget {
@@ -56,6 +70,21 @@ class _FileExplorerScreenState extends State<FileExplorerScreen>
   bool _isCreatingNewFolder = false;
 
   List<Map<String, dynamic>> drives = [];
+
+  static List<QuickAccessItem> quickAccessItems = [
+    // Replace with your actual icon data or use libraries like Font Awesome
+    QuickAccessItem(icon: Icon(FluentUI.FluentIcons.this_p_c), name: 'Desktop'),
+    QuickAccessItem(
+        icon: Icon(FluentUI.FluentIcons.documentation), name: 'Documents'),
+    QuickAccessItem(
+        icon: Icon(FluentUI.FluentIcons.download), name: 'Downloads'),
+    QuickAccessItem(
+        icon: Icon(FluentUI.FluentIcons.picture_center), name: 'Images'),
+    QuickAccessItem(
+        icon: Icon(FluentUI.FluentIcons.music_in_collection), name: 'Music'),
+    QuickAccessItem(
+        icon: Icon(FluentUI.FluentIcons.my_movies_t_v), name: 'Videos'),
+  ];
 
   void _createFolder() async {
     try {
@@ -202,18 +231,22 @@ class _FileExplorerScreenState extends State<FileExplorerScreen>
 
   @override
   Widget build(BuildContext context) {
+    int crossAxisCount = MediaQuery.of(context).size.width ~/ 180;
+    int crossAxisCountDrives = MediaQuery.of(context).size.width ~/ 300;
     return GlassContainer.clearGlass(
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
-      child: Scaffold(
-        backgroundColor: Color.fromARGB(199, 221, 221, 221),
-        appBar: AppBar(
+      color: Color.fromARGB(205, 220, 220, 220),
+      child: FluentUI.ScaffoldPage(
+        padding: EdgeInsets.zero,
+        header: AppBar(
           flexibleSpace: shortLongPress(
             duration: const Duration(milliseconds: 0),
             onLongPress: () {
               windowManager.startDragging();
             },
             child: Container(
+              height: 40,
               color: Colors.transparent,
             ),
           ),
@@ -230,61 +263,49 @@ class _FileExplorerScreenState extends State<FileExplorerScreen>
                 child: const Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(Icons.home_rounded, size: 20),
+                    Icon(FluentUI.FluentIcons.home, size: 16),
                     SizedBox(width: 10),
                     Text(
                       'Home',
                       style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
                     ),
                   ],
                 ),
               ),
               Spacer(),
               Container(
-                padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(200, 255, 255, 255),
                   borderRadius: BorderRadius.circular(100.0),
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(
-                          maxHeight: 20,
-                          maxWidth: 20,
-                        ),
+                    FluentUI.IconButton(
                         onPressed: () {
                           windowManager.minimize();
                         },
-                        icon: Icon(Icons.horizontal_rule_rounded, size: 20)),
+                        icon: Icon(FluentUI.FluentIcons.chevron_down_end,
+                            size: 14)),
                     SizedBox(width: 18),
-                    IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(
-                          maxHeight: 20,
-                          maxWidth: 20,
-                        ),
+                    FluentUI.IconButton(
                         onPressed: () async {
                           await windowManager.isMaximized()
                               ? windowManager.unmaximize()
                               : windowManager.maximize();
                         },
-                        icon: const Icon(Icons.circle_outlined, size: 16)),
+                        icon: const Icon(FluentUI.FluentIcons.circle_ring,
+                            size: 14)),
                     SizedBox(width: 18),
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      splashColor: Colors.red.shade300,
-                      hoverColor: Colors.red.shade300,
-                      constraints: const BoxConstraints(
-                        maxHeight: 20,
-                        maxWidth: 20,
-                      ),
+                    FluentUI.IconButton(
                       onPressed: () {
                         windowManager.close();
                       },
-                      icon: const Icon(Icons.close_rounded, size: 20),
+                      icon: const Icon(
+                        FluentUI.FluentIcons.cancel,
+                        size: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -292,37 +313,198 @@ class _FileExplorerScreenState extends State<FileExplorerScreen>
             ],
           ),
         ),
-        body: Column(
-          children: [
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 40),
-              child: Row(
-                children: [
-                  Text('Home',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.w400)),
-                  Spacer(),
-                ],
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 40),
+                child: Row(
+                  children: [
+                    Text('Home',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.w400)),
+                    Spacer(),
+                    // SizedBox(
+                    //   width: 300,
+                    //   child: FluentUI.TextBox(
+                    //     decoration: BoxDecoration(
+                    //       // color: const Color.fromARGB(200, 255, 255, 255),
+                    //       borderRadius: BorderRadius.circular(100.0),
+                    //     ),
+                    //     padding: const EdgeInsets.symmetric(horizontal: 10),
+                    //     suffix: Icon(FluentUI.FluentIcons.search),
+                    //   ),
+                    // ),
+                  ],
+                ),
               ),
-            ),
-            Container(
-              
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: FluentUI.Expander(
+                  contentBackgroundColor: Color.fromARGB(150, 255, 255, 255),
+                  headerBackgroundColor: FluentUI.ButtonState.all(
+                      const Color.fromARGB(200, 255, 255, 255)),
+                  initiallyExpanded: true,
+                  header: Text('Quick Access'),
+                  content: GridView.builder(
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      childAspectRatio: 1.3,
+                      crossAxisCount:
+                          crossAxisCount, // number of items in each row
+                      mainAxisSpacing: 12.0, // spacing between rows
+                      crossAxisSpacing: 10.0, // spacing between columns
+                    ),
+                    padding: EdgeInsets.zero, // padding around the grid
+                    itemCount: quickAccessItems.length, // total number of items
+                    itemBuilder: (context, index) {
+                      final item = quickAccessItems[index];
+                      return FluentUI.ListTile.selectable(
+                        cursor: SystemMouseCursors.click,
+                        selectionMode: FluentUI.ListTileSelectionMode.single,
+                        tileColor: FluentUI.ButtonState.all(
+                            const Color.fromARGB(200, 255, 255, 255)),
+                        // width: 20,
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            item.icon,
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Center(
+                              child: Text(
+                                item.name,
+                                style: TextStyle(fontSize: 18.0),
+                                textAlign: TextAlign
+                                    .center, // Center text horizontally
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30),
+                child: FluentUI.Expander(
+                  contentBackgroundColor: Color.fromARGB(150, 255, 255, 255),
+                  headerBackgroundColor: FluentUI.ButtonState.all(
+                      const Color.fromARGB(200, 255, 255, 255)),
+                  initiallyExpanded: true,
+                  header: Text('Drives'),
+                  content: GridView.builder(
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      childAspectRatio: 2.5,
+                      crossAxisCount:
+                          crossAxisCountDrives, // number of items in each row
+                      mainAxisSpacing: 12.0, // spacing between rows
+                      crossAxisSpacing: 10.0, // spacing between columns
+                    ),
+                    padding: EdgeInsets.zero, // padding around the grid
+                    itemCount: drives.length, // total number of items
+                    itemBuilder: (context, index) {
+                      final drive = drives[index];
+                      return FluentUI.ListTile.selectable(
+                        cursor: SystemMouseCursors.click,
+                        selectionMode: FluentUI.ListTileSelectionMode.single,
+                        tileColor: FluentUI.ButtonState.all(
+                            const Color.fromARGB(200, 255, 255, 255)),
+                        title: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          // Use Stack for overlapping widgets
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(FluentUI.FluentIcons.hard_drive, size: 20),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                    '${drive['VolumeLabel']} (${drive['Name']})'),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            FluentUI.ProgressBar(
+                              value: 100.0 -
+                                  (drive['TotalFreeSpace'] *
+                                      100 /
+                                      drive['TotalSize']),
+                              activeColor: Colors.blue.shade600,
+                              // valueColor: AlwaysStoppedAnimation(Colors.blue),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Text(
+                                '${drive['TotalFreeSpace'].toStringAsFixed(1)} GB Free of ${drive['TotalSize'].toStringAsFixed(1)} GB'),
+                          ],
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _currentDirectory = Directory(drive['Name']);
+                            _currentPath = drive['Name'];
+                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NewPage(
+                                // Pass any necessary data (e.g., _currentDirectory, _currentPath) to the new page
+                                currentDirectory: _currentDirectory,
+                                currentPath: _currentPath,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 
-  IconData _getIcon(FileSystemEntity entity) {
-    if (entity is Directory) {
-      return Icons.folder;
-    } else if (entity is File) {
-      return Icons.insert_drive_file;
-    } else {
-      return Icons.insert_drive_file; // Default icon
-    }
+  // IconData _getIcon(FileSystemEntity entity) {
+  //   if (entity is Directory) {
+  //     return Icons.folder;
+  //   } else if (entity is File) {
+  //     return Icons.insert_drive_file;
+  //   } else {
+  //     return Icons.insert_drive_file; // Default icon
+  //   }
+  // }
+}
+
+class NewPage extends StatelessWidget {
+  final Directory? currentDirectory;
+  final String currentPath;
+
+  NewPage({required this.currentDirectory, required this.currentPath});
+
+  @override
+  Widget build(BuildContext context) {
+    // Use the currentDirectory and currentPath values here to display information, perform actions, etc.
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(currentPath),
+      ),
+      body: Center(
+        child: Text('Navigated to the new page!'),
+      ),
+    );
   }
 }
 
@@ -341,6 +523,7 @@ class shortLongPress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RawGestureDetector(
+      behavior: HitTestBehavior.translucent,
       gestures: <Type, GestureRecognizerFactory>{
         LongPressGestureRecognizer:
             GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(

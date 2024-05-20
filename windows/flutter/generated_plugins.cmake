@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   disks_desktop
   screen_retriever
+  system_theme
   window_manager
 )
 
