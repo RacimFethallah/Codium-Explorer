@@ -1,36 +1,42 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart' as FluentUI;
+import 'package:open_filex/open_filex.dart';
 
 class Explorer extends StatefulWidget {
   final Directory currentDirectory;
   final String currentPath;
 
-  const Explorer({super.key, required this.currentDirectory, required this.currentPath});
+  const Explorer(
+      {super.key, required this.currentDirectory, required this.currentPath});
 
   @override
   State<Explorer> createState() => _ExplorerState();
 }
 
 class _ExplorerState extends State<Explorer> {
-    late Directory _currentDirectory;
+  late Directory _currentDirectory;
   late String _currentPath;
   final List<Directory> _history = [];
+  bool isEditingPath = false;
+  final TextEditingController _newFolderNameController =
+      TextEditingController();
 
-@override
+  bool _isCreatingNewFolder = false;
+
+  @override
   void initState() {
     super.initState();
     _currentDirectory = widget.currentDirectory;
     _currentPath = widget.currentPath;
   }
 
-
-
   void _goBack() {
     if (_history.isNotEmpty) {
       setState(() {
         _currentDirectory = _history.removeLast();
-        _currentPath = _currentDirectory!.path;
+        _currentPath = _currentDirectory.path;
       });
     }
   }
@@ -40,11 +46,11 @@ class _ExplorerState extends State<Explorer> {
   }
 
   void _goUp() {
-    if (_currentDirectory!.parent.path != Directory.current.path) {
+    if (_currentDirectory.parent.path != Directory.current.path) {
       setState(() {
-        _currentDirectory = _currentDirectory!.parent;
-        _currentPath = _currentDirectory!.path;
-        _history.add(_currentDirectory!); // Add current to history
+        _history.add(_currentDirectory);
+        _currentDirectory = _currentDirectory.parent;
+        _currentPath = _currentDirectory.path;
       });
     }
   }
@@ -69,80 +75,120 @@ class _ExplorerState extends State<Explorer> {
     }
   }
 
+  void _createFolder() async {
+    try {
+      String newFolderName = _newFolderNameController.text.trim();
+      if (newFolderName.isNotEmpty) {
+        final newDir = Directory(_currentDirectory.path + '/' + newFolderName);
+        await newDir.create();
+        setState(() {
+          _isCreatingNewFolder = false;
+          _newFolderNameController.text = ""; // Clear text field
+          _refresh();
+        });
+      }
+    } catch (e) {
+      // Handle exception (e.g., snackbar)
+      print("Error creating folder: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: SingleChildScrollView(
-        child: Column(
+    return Column(
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: _goBack,
-                disabledColor: Colors.grey, // Disable if no history
-              ),
-              IconButton(
-                icon: Icon(Icons.arrow_forward),
-                onPressed: _goBack,
-                disabledColor: Colors.grey, // Disable if no history
-              ),
-              IconButton(icon: Icon(Icons.refresh), onPressed: _refresh),
-              IconButton(
-                icon: Icon(Icons.create_new_folder),
-                // onPressed: () => setState(() => _isCreatingNewFolder = true),
-                onPressed: (){},
-              ),
-              Expanded(
-                child: TextField(
-                  controller: TextEditingController(text: _currentPath),
-                  decoration: const InputDecoration(
-                    // filled: true,
-                    // fillColor: Colors.blue,
-                    border: OutlineInputBorder(
-                      // borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.all(Radius.circular(100.0)),
-                    ),
-                  ),
-                  onSubmitted: (value) async {
-                    // try {
-                    //   Directory newDir = Directory(value);
-                    //   bool exists = await newDir.exists();
-                    //   if (exists) {
-                    //     setState(() {
-                    //       _history.add(_currentDirectory!);
-                    //       _currentDirectory = newDir;
-                    //       _currentPath = value;
-                    //     });
-                    //   } else {
-                    //     // Handle invalid path (e.g., snackbar)
-                    //     print("Invalid path: $value");
-                    //   }
-                    // } catch (e) {
-                    //   // Handle error (e.g., snackbar)
-                    //   print("Error navigating to directory: $e");
-                    // }
-                  },
-                ),
-              ),
-              IconButton(
-                  icon: Icon(Icons.vertical_align_top), onPressed: _goUp),
-              ],
-      
+            FluentUI.IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: _goBack,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 40),
-              child: Row(
-                children: [
-                  Text(_currentDirectory.path, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400)),
-                  Spacer(),
-                ],
+            FluentUI.IconButton(
+              icon: Icon(Icons.arrow_forward),
+              onPressed: _goForward, // Corrected from _goBack to _goForward
+            ),
+            FluentUI.IconButton(icon: Icon(Icons.refresh), onPressed: _refresh),
+            FluentUI.IconButton(
+              icon: Icon(Icons.create_new_folder),
+              onPressed: () {
+                setState(() {
+                  _isCreatingNewFolder = true;
+                });
+              },
+            ),
+            Expanded(
+              child: FluentUI.TextBox(
+                controller: TextEditingController(text: _currentPath),
+                onSubmitted: (value) async {
+                  // Handle path submission logic here
+                },
               ),
             ),
-            // Add more content here based on the directory's content
+            FluentUI.IconButton(
+              icon: Icon(Icons.vertical_align_top),
+              onPressed: _goUp,
+            ),
           ],
         ),
-      ),
+        Expanded(
+          // Replaced SingleChildScrollView with Expanded
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+            child: Column(
+              children: [
+                if (_isCreatingNewFolder)
+                  FluentUI.ListTile(
+                    title: FluentUI.TextBox(
+                      controller: _newFolderNameController,
+                      autofocus: true,
+                      onSubmitted: (_) => _createFolder(),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.check),
+                      onPressed: _createFolder,
+                    ),
+                  ),
+                Expanded(
+                  // Ensures ListView.builder takes remaining space
+                  child: ListView.builder(
+                    itemCount: _currentDirectory.listSync().length,
+                    itemBuilder: (context, index) {
+                      FileSystemEntity entity =
+                          _currentDirectory.listSync()[index];
+                      return FluentUI.ListTile.selectable(
+                        title:
+                            Text(entity.path.split('/').last.split(r'\').last),
+                        leading: Icon(_getIcon(entity)),
+                        onPressed: () {
+                          if (entity is Directory) {
+                            setState(() {
+                              _history.add(_currentDirectory);
+                              _currentDirectory = entity;
+                              _currentPath = entity.path;
+                            });
+                          } else {
+                            OpenFilex.open(entity.path);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
+  }
+
+  IconData _getIcon(FileSystemEntity entity) {
+    if (entity is Directory) {
+      return Icons.folder;
+    } else if (entity is File) {
+      return Icons.insert_drive_file;
+    } else {
+      return Icons.insert_drive_file; // Default icon
+    }
   }
 }
