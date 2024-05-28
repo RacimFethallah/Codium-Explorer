@@ -64,7 +64,7 @@ class _FileExplorerScreenState extends State<FileExplorerScreen>
     with WindowListener {
   Directory? _currentDirectory;
   final List<Directory> _history = []; // Stores previous directories
-  String _currentPath = 'Home';  // Default to home
+  String _currentPath = 'Home'; // Default to home
   bool isEditingPath = false;
   final TextEditingController _newFolderNameController =
       TextEditingController();
@@ -188,8 +188,6 @@ class _FileExplorerScreenState extends State<FileExplorerScreen>
     }
   }
 
-  
-
   void _refresh() async {
     if (_currentPath.isNotEmpty) {
       try {
@@ -219,230 +217,236 @@ class _FileExplorerScreenState extends State<FileExplorerScreen>
       width: MediaQuery.of(context).size.width,
       color: Color.fromARGB(220, 255, 255, 255),
       child: FluentUI.ScaffoldPage(
-        padding: EdgeInsets.zero,
-        header: AppBar(
-          flexibleSpace: shortLongPress(
-            duration: const Duration(milliseconds: 0),
-            onLongPress: () {
-              windowManager.startDragging();
-            },
-            child: Container(
-              height: 40,
-              color: Colors.transparent,
+          padding: EdgeInsets.zero,
+          header: AppBar(
+            flexibleSpace: shortLongPress(
+              duration: const Duration(milliseconds: 0),
+              onLongPress: () {
+                windowManager.startDragging();
+              },
+              child: Container(
+                height: 40,
+                color: Colors.transparent,
+              ),
+            ),
+            backgroundColor: Colors.transparent,
+            title: Row(
+              children: [
+                Container(
+                  width: 200,
+                  padding: EdgeInsets.symmetric(vertical: 6, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(200, 255, 255, 255),
+                    borderRadius: BorderRadius.circular(100.0),
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(FluentUI.FluentIcons.home, size: 16),
+                      SizedBox(width: 10),
+                      Text(
+                        'Home',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  ),
+                ),
+                FluentUI.IconButton(
+                    icon: Icon(FluentUI.FluentIcons.add), onPressed: () {}),
+                Spacer(),
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(200, 255, 255, 255),
+                    borderRadius: BorderRadius.circular(100.0),
+                  ),
+                  child: Row(
+                    children: [
+                      FluentUI.IconButton(
+                          onPressed: () {
+                            windowManager.minimize();
+                          },
+                          icon: Icon(FluentUI.FluentIcons.chevron_down_end,
+                              size: 14)),
+                      SizedBox(width: 18),
+                      FluentUI.IconButton(
+                          onPressed: () async {
+                            await windowManager.isMaximized()
+                                ? windowManager.unmaximize()
+                                : windowManager.maximize();
+                          },
+                          icon: const Icon(FluentUI.FluentIcons.circle_ring,
+                              size: 14)),
+                      SizedBox(width: 18),
+                      FluentUI.IconButton(
+                        onPressed: () {
+                          windowManager.close();
+                        },
+                        icon: const Icon(
+                          FluentUI.FluentIcons.cancel,
+                          size: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
             ),
           ),
-          backgroundColor: Colors.transparent,
-          title: Row(
-            children: [
-              Container(
-                width: 200,
-                padding: EdgeInsets.symmetric(vertical: 6, horizontal: 20),
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(200, 255, 255, 255),
-                  borderRadius: BorderRadius.circular(100.0),
-                ),
-                child: const Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(FluentUI.FluentIcons.home, size: 16),
-                    SizedBox(width: 10),
-                    Text(
-                      'Home',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-                    ),
-                  ],
-                ),
-              ),
-              Spacer(),
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(200, 255, 255, 255),
-                  borderRadius: BorderRadius.circular(100.0),
-                ),
-                child: Row(
-                  children: [
-                    FluentUI.IconButton(
-                        onPressed: () {
-                          windowManager.minimize();
-                        },
-                        icon: Icon(FluentUI.FluentIcons.chevron_down_end,
-                            size: 14)),
-                    SizedBox(width: 18),
-                    FluentUI.IconButton(
-                        onPressed: () async {
-                          await windowManager.isMaximized()
-                              ? windowManager.unmaximize()
-                              : windowManager.maximize();
-                        },
-                        icon: const Icon(FluentUI.FluentIcons.circle_ring,
-                            size: 14)),
-                    SizedBox(width: 18),
-                    FluentUI.IconButton(
-                      onPressed: () {
-                        windowManager.close();
-                      },
-                      icon: const Icon(
-                        FluentUI.FluentIcons.cancel,
-                        size: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
-        ),
-        content:_currentPath == 'Home'
-            ? home(crossAxisCount, crossAxisCountDrives)
-             : Explorer(currentDirectory: _currentDirectory!, currentPath: _currentPath),
-      ),
+          // content:_currentPath == 'Home'
+          //     ? home(crossAxisCount, crossAxisCountDrives)
+          //      : Explorer(currentDirectory: _currentDirectory!, currentPath: _currentPath),
+          content: home(crossAxisCount, crossAxisCountDrives)),
     );
   }
 
-
-
   SingleChildScrollView home(int crossAxisCount, int crossAxisCountDrives) {
     return SingleChildScrollView(
-        child: Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 40),
-              child: Row(
-                children: [
-                  Text('Home',
-                      style: TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.w400)),
-                  Spacer(),
-                ],
+      child: Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 40),
+            child: Row(
+              children: [
+                Text('Home',
+                    style:
+                        TextStyle(fontSize: 24, fontWeight: FontWeight.w400)),
+                Spacer(),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: FluentUI.Expander(
+              contentBackgroundColor: Color.fromARGB(150, 255, 255, 255),
+              headerBackgroundColor: FluentUI.ButtonState.all(
+                  const Color.fromARGB(200, 255, 255, 255)),
+              initiallyExpanded: true,
+              header: Text('Quick Access'),
+              content: GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: 1.3,
+                  crossAxisCount: crossAxisCount, // number of items in each row
+                  mainAxisSpacing: 12.0, // spacing between rows
+                  crossAxisSpacing: 10.0, // spacing between columns
+                ),
+                padding: EdgeInsets.zero, // padding around the grid
+                itemCount: quickAccessItems.length, // total number of items
+                itemBuilder: (context, index) {
+                  final item = quickAccessItems[index];
+                  return FluentUI.ListTile.selectable(
+                    cursor: SystemMouseCursors.click,
+                    selectionMode: FluentUI.ListTileSelectionMode.single,
+                    tileColor: FluentUI.ButtonState.all(
+                        const Color.fromARGB(200, 255, 255, 255)),
+                    // width: 20,
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        item.icon,
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Center(
+                          child: Text(
+                            item.name,
+                            style: TextStyle(fontSize: 18.0),
+                            textAlign:
+                                TextAlign.center, // Center text horizontally
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: FluentUI.Expander(
-                contentBackgroundColor: Color.fromARGB(150, 255, 255, 255),
-                headerBackgroundColor: FluentUI.ButtonState.all(
-                    const Color.fromARGB(200, 255, 255, 255)),
-                initiallyExpanded: true,
-                header: Text('Quick Access'),
-                content: GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    childAspectRatio: 1.3,
-                    crossAxisCount:
-                        crossAxisCount, // number of items in each row
-                    mainAxisSpacing: 12.0, // spacing between rows
-                    crossAxisSpacing: 10.0, // spacing between columns
-                  ),
-                  padding: EdgeInsets.zero, // padding around the grid
-                  itemCount: quickAccessItems.length, // total number of items
-                  itemBuilder: (context, index) {
-                    final item = quickAccessItems[index];
-                    return FluentUI.ListTile.selectable(
-                      cursor: SystemMouseCursors.click,
-                      selectionMode: FluentUI.ListTileSelectionMode.single,
-                      tileColor: FluentUI.ButtonState.all(
-                          const Color.fromARGB(200, 255, 255, 255)),
-                      // width: 20,
-                      title: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          item.icon,
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Center(
-                            child: Text(
-                              item.name,
-                              style: TextStyle(fontSize: 18.0),
-                              textAlign: TextAlign
-                                  .center, // Center text horizontally
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30),
+            child: FluentUI.Expander(
+              contentBackgroundColor: Color.fromARGB(150, 255, 255, 255),
+              headerBackgroundColor: FluentUI.ButtonState.all(
+                  const Color.fromARGB(200, 255, 255, 255)),
+              initiallyExpanded: true,
+              header: Text('Drives'),
+              content: GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: 2.5,
+                  crossAxisCount:
+                      crossAxisCountDrives, // number of items in each row
+                  mainAxisSpacing: 12.0, // spacing between rows
+                  crossAxisSpacing: 10.0, // spacing between columns
+                ),
+                padding: EdgeInsets.zero, // padding around the grid
+                itemCount: drives.length, // total number of items
+                itemBuilder: (context, index) {
+                  final drive = drives[index];
+                  return FluentUI.ListTile.selectable(
+                    cursor: SystemMouseCursors.click,
+                    selectionMode: FluentUI.ListTileSelectionMode.single,
+                    tileColor: FluentUI.ButtonState.all(
+                        const Color.fromARGB(200, 255, 255, 255)),
+                    title: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      // Use Stack for overlapping widgets
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(FluentUI.FluentIcons.hard_drive, size: 20),
+                            SizedBox(
+                              width: 10,
                             ),
+                            Text('${drive['VolumeLabel']} (${drive['Name']})'),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        FluentUI.ProgressBar(
+                          value: 100.0 -
+                              (drive['TotalFreeSpace'] *
+                                  100 /
+                                  drive['TotalSize']),
+                          activeColor: Colors.blue.shade600,
+                          // valueColor: AlwaysStoppedAnimation(Colors.blue),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                            '${drive['TotalFreeSpace'].toStringAsFixed(1)} GB Free of ${drive['TotalSize'].toStringAsFixed(1)} GB'),
+                      ],
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _currentDirectory = Directory(drive['Name']);
+                        _currentPath = drive['Name'];
+                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Explorer(
+                            currentDirectory: Directory(drive['Name']),
+                            currentPath: drive['Name'],
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30),
-              child: FluentUI.Expander(
-                contentBackgroundColor: Color.fromARGB(150, 255, 255, 255),
-                headerBackgroundColor: FluentUI.ButtonState.all(
-                    const Color.fromARGB(200, 255, 255, 255)),
-                initiallyExpanded: true,
-                header: Text('Drives'),
-                content: GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    childAspectRatio: 2.5,
-                    crossAxisCount:
-                        crossAxisCountDrives, // number of items in each row
-                    mainAxisSpacing: 12.0, // spacing between rows
-                    crossAxisSpacing: 10.0, // spacing between columns
-                  ),
-                  padding: EdgeInsets.zero, // padding around the grid
-                  itemCount: drives.length, // total number of items
-                  itemBuilder: (context, index) {
-                    final drive = drives[index];
-                    return FluentUI.ListTile.selectable(
-                      cursor: SystemMouseCursors.click,
-                      selectionMode: FluentUI.ListTileSelectionMode.single,
-                      tileColor: FluentUI.ButtonState.all(
-                          const Color.fromARGB(200, 255, 255, 255)),
-                      title: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        // Use Stack for overlapping widgets
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(FluentUI.FluentIcons.hard_drive, size: 20),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                  '${drive['VolumeLabel']} (${drive['Name']})'),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          FluentUI.ProgressBar(
-                            value: 100.0 -
-                                (drive['TotalFreeSpace'] *
-                                    100 /
-                                    drive['TotalSize']),
-                            activeColor: Colors.blue.shade600,
-                            // valueColor: AlwaysStoppedAnimation(Colors.blue),
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Text(
-                              '${drive['TotalFreeSpace'].toStringAsFixed(1)} GB Free of ${drive['TotalSize'].toStringAsFixed(1)} GB'),
-                        ],
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _currentDirectory = Directory(drive['Name']);
-                          _currentPath = drive['Name'];
-                        });
-                      },
-                    );
-                  },
-                ),
-              ),
-            )
-          ],
-        ),
-      );
+          )
+        ],
+      ),
+    );
   }
 }
 
